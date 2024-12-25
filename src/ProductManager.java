@@ -26,31 +26,36 @@ public class ProductManager {
      *
      * @param productName The name of the product to be removed.
      */
-    public void removeProduct(String productName) {
-        File tempFile = new File("temp_products.txt");  // Temporary file for writing
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
 
+
+    public void removeProduct(String productName) {
+        File file = new File(FILE_NAME);  // Original product file
+        List<String> lines = new ArrayList<>();  // To hold the file content
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             boolean productFound = false;
 
+            // Read all lines from the file and store them in the list
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts[0].equalsIgnoreCase(productName)) {
-                    productFound = true;  // Product found, do not write to the new file
-                    continue;  // Skip writing this line to remove the product
+                String storedProductName = parts[0].trim();  // Trim the stored product name for comparison
+                if (storedProductName.equalsIgnoreCase(productName.trim())) {
+                    productFound = true;  // Product found, do not add to the list
+                    continue;  // Skip adding this line to remove the product
                 }
-                // If product is not found, copy the line to the new file
-                writer.write(line);
-                writer.newLine();
+                // If product is not found, add the line to the list
+                lines.add(line);
             }
 
             if (productFound) {
-                // Replace the original file with the new file
-                if (tempFile.renameTo(new File(FILE_NAME))) {
+                // Write the updated content back to the file
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                    for (String lineToWrite : lines) {
+                        writer.write(lineToWrite);
+                        writer.newLine();
+                    }
                     System.out.println("Product removed: " + productName);
-                } else {
-                    System.err.println("Error updating product list.");
                 }
             } else {
                 System.out.println("Product not found: " + productName);
@@ -60,6 +65,8 @@ public class ProductManager {
             System.err.println("Error removing product from file: " + e.getMessage());
         }
     }
+
+
 
     /**
      * Lists all products stored in the file.

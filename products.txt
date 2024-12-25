@@ -1,2 +1,3 @@
 Laptop,200.0
-PC,400.0
+Iphone,100.0
+Computer,500.0
